@@ -92,7 +92,8 @@ class ControllerPaymentBest2pay extends Controller {
             'phone' => $order_info['telephone'],
             'currency' => isset($currency[$currency_code]) ? $currency[$currency_code] : 0,
             'mode' => 1,
-            'url' => HTTP_SERVER . 'index.php?route=extension/payment/best2pay/request',
+            'url' => HTTP_SERVER . 'index.php?route=checkout/success',
+            'failurl' => HTTP_SERVER . 'index.php?route=checkout/checkout',
             'signature' => $signature
         ));
 
