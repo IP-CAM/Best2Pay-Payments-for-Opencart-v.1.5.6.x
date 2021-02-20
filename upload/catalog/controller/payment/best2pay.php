@@ -117,6 +117,7 @@ class ControllerPaymentBest2pay extends Controller {
 
         $b2p_order_id = file_get_contents($url, false, $context);
 
+		$order_id = 0;
 
 		if (is_numeric($b2p_order_id)) {
     		$order_id = (int) $b2p_order_id;
