@@ -30,14 +30,15 @@ class ControllerPaymentBest2pay extends Controller {
 		$commission_amount = $total/100*$commission;
 
         $fiscalPositions='';
-        $KKT = $this->config->get('best2pay_kkt');
+        //$KKT = $this->config->get('best2pay_kkt');
+        $KKT = true;
 
         $fiscalAmount=0;
         $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
 
         if ($KKT==1){
             $TAX = (strlen($this->config->get('best2pay_tax')) > 0) ?
-                intval($this->config->get('best2pay_tax')) : 7;
+                intval($this->config->get('best2pay_tax')) : 6;
             if ($TAX > 0 && $TAX < 7){
                 $products = $this->cart->getProducts();
                 foreach ($products as $product) {
@@ -57,7 +58,7 @@ class ControllerPaymentBest2pay extends Controller {
                         $fiscalPositions.='1'.';';
                         $fiscalPositions.= $shippingCost.';';
                         $fiscalPositions.=$TAX.';';
-                        $fiscalPositions.='Shipping Cost'.'|';
+                        $fiscalPositions.='Доставка'.'|';
                         $fiscalAmount = $fiscalAmount + $shippingCost;
                     }
                 }
@@ -116,7 +117,6 @@ class ControllerPaymentBest2pay extends Controller {
 
 
         $b2p_order_id = file_get_contents($url, false, $context);
-
 		$order_id = 0;
 
 		if (is_numeric($b2p_order_id)) {
