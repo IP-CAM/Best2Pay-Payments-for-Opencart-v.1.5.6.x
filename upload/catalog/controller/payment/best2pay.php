@@ -37,7 +37,7 @@ class ControllerPaymentBest2pay extends Controller {
         $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
 
         if ($KKT==1){
-            $TAX = (strlen($this->config->get('best2pay_tax')) > 0) ?
+            $TAX = (strlen($this->config->get('best2pay_tax')) > 0 && $this->config->get('best2pay_tax') != 0 && $this->config->get('best2pay_tax') < 7) ?
                 intval($this->config->get('best2pay_tax')) : 6;
             if ($TAX > 0 && $TAX < 7){
                 $products = $this->cart->getProducts();
@@ -93,7 +93,7 @@ class ControllerPaymentBest2pay extends Controller {
             'phone' => $order_info['telephone'],
             'currency' => isset($currency[$currency_code]) ? $currency[$currency_code] : 0,
             'mode' => 1,
-            'url' => HTTP_SERVER . 'index.php?route=checkout/success',
+            'url' => HTTP_SERVER . 'index.php?route=payment/best2pay/request',
             'failurl' => HTTP_SERVER . 'index.php?route=checkout/checkout',
             'signature' => $signature
         ));
@@ -199,16 +199,7 @@ class ControllerPaymentBest2pay extends Controller {
 			$operation_data['operation'] = $this->request->get['operation'];
 			$operation_data['signature'] = base64_encode(md5($operation_data['sector'] . $operation_data['id'] . $operation_data['operation'] . $this->config->get('best2pay_password')));
 
-			$options = array(
-				'http' => array(
-					 'header'  => "Content-type: 
-					application/x-www-form-urlencoded\r\n",
-					 'method'  => 'POST',
-					 'content' => http_build_query($operation_data),
-				),
-			);
-			$context  = stream_context_create($options);
-			$operation = file_get_contents($action . 'Operation', false, $context);
+			$operation = file_get_contents($action . 'Operation'.'?sector='.$operation_data['sector'].'&id='.$operation_data['id'].'&operation='.$operation_data['operation'].'&signature='.$operation_data['signature']);
 
 			if ($operation) {
 				$result = new SimpleXMLElement($operation);
@@ -265,6 +256,8 @@ class ControllerPaymentBest2pay extends Controller {
 					$this->model_checkout_order->update($this->request->get['reference'], $this->config->get('best2pay_order_status_id'), $message, false);
 			
 					$this->data['continue'] = $this->url->link('checkout/success');
+
+					header('Location: ' . $this->data['continue']);
 					
 					if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/best2pay_success.tpl')) {
 						$this->template = $this->config->get('config_template') . '/template/payment/best2pay_success.tpl';
